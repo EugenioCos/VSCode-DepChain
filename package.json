@@ -1,0 +1,214 @@
+{
+  "name": "dep-chain",
+  "displayName": "Dep Chain",
+  "description": "Run ordered cross-repo setup chains: fetch, checkout, pull and shell commands in a single terminal.",
+  "version": "0.0.1",
+  "publisher": "EugenioCos",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EugenioCos/VSCode-DepChain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/EugenioCos/VSCode-DepChain/issues"
+  },
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Dep Chain runs git and npm commands, including raw shell commands, defined in the workspace configuration."
+    }
+  },
+  "keywords": [
+    "git",
+    "npm",
+    "monorepo",
+    "dependencies",
+    "workflow"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "depChain.runSetup",
+        "title": "Run Setup",
+        "category": "Dep Chain",
+        "icon": "$(play)"
+      },
+      {
+        "command": "depChain.runSetupItem",
+        "title": "Run Setup",
+        "category": "Dep Chain",
+        "icon": "$(play)"
+      },
+      {
+        "command": "depChain.createSetup",
+        "title": "Create Setup",
+        "category": "Dep Chain",
+        "icon": "$(add)"
+      },
+      {
+        "command": "depChain.deleteSetupItem",
+        "title": "Delete Setup",
+        "category": "Dep Chain",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "depChain.cancel",
+        "title": "Cancel Run",
+        "category": "Dep Chain"
+      },
+      {
+        "command": "depChain.retryFailed",
+        "title": "Retry Failed Step",
+        "category": "Dep Chain"
+      },
+      {
+        "command": "depChain.validateConfig",
+        "title": "Validate Config",
+        "category": "Dep Chain"
+      },
+      {
+        "command": "depChain.openConfig",
+        "title": "Open Config File",
+        "category": "Dep Chain",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "depChain.createConfig",
+        "title": "Create Config File",
+        "category": "Dep Chain",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "depChain.refreshSetups",
+        "title": "Refresh Setups",
+        "category": "Dep Chain",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "depChain.showTerminal",
+        "title": "Show Terminal",
+        "category": "Dep Chain"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "depChain",
+          "title": "Dep Chain",
+          "icon": "resources/dep-chain.svg"
+        }
+      ]
+    },
+    "views": {
+      "depChain": [
+        {
+          "id": "depChain.setups",
+          "name": "Setups"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "depChain.createSetup",
+          "when": "view == depChain.setups",
+          "group": "navigation@1"
+        },
+        {
+          "command": "depChain.runSetup",
+          "when": "view == depChain.setups",
+          "group": "navigation@2"
+        },
+        {
+          "command": "depChain.refreshSetups",
+          "when": "view == depChain.setups",
+          "group": "navigation@3"
+        },
+        {
+          "command": "depChain.openConfig",
+          "when": "view == depChain.setups",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "depChain.runSetupItem",
+          "when": "view == depChain.setups && viewItem == depChain.setup",
+          "group": "inline@1"
+        },
+        {
+          "command": "depChain.deleteSetupItem",
+          "when": "view == depChain.setups && viewItem == depChain.setup",
+          "group": "inline@2"
+        },
+        {
+          "command": "depChain.deleteSetupItem",
+          "when": "view == depChain.setups && viewItem == depChain.setup",
+          "group": "1_modification"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "depChain.runSetupItem",
+          "when": "false"
+        },
+        {
+          "command": "depChain.deleteSetupItem",
+          "when": "false"
+        }
+      ]
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": "**/dep-chain.json",
+        "url": "./schemas/dep-chain.schema.json"
+      }
+    ],
+    "configuration": {
+      "title": "Dep Chain",
+      "properties": {
+        "depChain.configPath": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "markdownDescription": "Path to the config file, relative to the workspace folder or absolute. Empty means `${workspaceFolder}/.vscode/dep-chain.json`."
+        },
+        "depChain.shellIntegrationTimeoutMs": {
+          "type": "number",
+          "default": 5000,
+          "minimum": 1000,
+          "description": "How long to wait for the terminal shell integration to activate before falling back to a child process."
+        },
+        "depChain.cmdStartGracePeriodMs": {
+          "type": "number",
+          "default": 1500,
+          "minimum": 0,
+          "description": "Milliseconds to watch the start command after launch. If it exits with a non-zero code within this window, the run is reported as failed."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test:unit": "npm run compile && mocha \"out/test/unit/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.17.0",
+    "@types/vscode": "^1.93.0",
+    "mocha": "^10.8.2",
+    "typescript": "^5.7.2"
+  }
+}

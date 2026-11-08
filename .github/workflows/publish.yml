@@ -1,0 +1,42 @@
+# Publishes the extension to the Visual Studio Marketplace using Trusted Publishing (OIDC),
+# so no Personal Access Token is committed or stored in the repository secrets.
+#
+# Prerequisites (once):
+#   1. Create the publisher at https://marketplace.visualstudio.com/manage. The publisher ID
+#      must match `publisher` in package.json (currently "eugeniocos").
+#   2. On the publisher page, create a "Trusted Publishing" policy that whitelists this
+#      repository and this workflow file.
+#
+# Usage: tag a release (git tag v0.0.1 && git push --tags). The tag must match `version` in
+# package.json, or run the workflow manually with workflow_dispatch.
+
+name: Publish to the Marketplace
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write # Required for the OIDC token exchanged by vsce.
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and run unit tests
+        run: npm run test:unit
+
+      - name: Publish
+        run: npx @vscode/vsce publish --oidc

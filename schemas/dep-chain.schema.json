@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.local/dep-chain.schema.json",
+  "title": "Dep Chain configuration",
+  "type": "object",
+  "required": ["workingDir", "setups"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "workingDir": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Directory containing the repositories, relative to the workspace folder or absolute."
+    },
+    "onDirty": {
+      "type": "string",
+      "enum": ["fail", "stash", "discard"],
+      "default": "fail",
+      "description": "What to do when a repository that needs a checkout has uncommitted changes."
+    },
+    "setups": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/definitions/setup"
+      }
+    }
+  },
+  "definitions": {
+    "step": {
+      "type": "object",
+      "required": ["repo"],
+      "additionalProperties": false,
+      "properties": {
+        "repo": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository directory name under workingDir."
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Branch, tag or commit to check out. Omit to use the current checkout."
+        },
+        "shell": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Raw shell command executed after fetch/checkout/pull. Use `npm run <script>` for npm scripts."
+        }
+      }
+    },
+    "setup": {
+      "type": "object",
+      "required": ["steps"],
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "onDirty": {
+          "type": "string",
+          "enum": ["fail", "stash", "discard"],
+          "description": "Overrides the top-level onDirty for this setup."
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/step"
+          }
+        },
+        "cmdstart": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Long-running shell command executed after the chain succeeds, in the last step's repo unless startRepo is set."
+        },
+        "startRepo": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository to run cmdstart in. Must appear in steps."
+        }
+      }
+    }
+  }
+}
